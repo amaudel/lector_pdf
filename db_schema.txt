@@ -1,0 +1,26 @@
+TABLE: entities
+  (0, 'ruc', 'TEXT', 0, None, 1)
+  (1, 'razon_social', 'TEXT', 0, None, 0)
+  (2, 'provincia', 'TEXT', 0, None, 0)
+  (3, 'tipo', 'TEXT', 0, None, 0)
+  (4, 'fuente', 'TEXT', 0, None, 0)
+TABLE: entities_fts
+  (0, 'ruc', '', 0, None, 0)
+  (1, 'razon_social', '', 0, None, 0)
+TABLE: entities_fts_data
+  (0, 'id', 'INTEGER', 0, None, 1)
+  (1, 'block', 'BLOB', 0, None, 0)
+TABLE: entities_fts_idx
+  (0, 'segid', '', 1, None, 1)
+  (1, 'term', '', 1, None, 2)
+  (2, 'pgno', '', 0, None, 0)
+TABLE: entities_fts_docsize
+  (0, 'id', 'INTEGER', 0, None, 1)
+  (1, 'sz', 'BLOB', 0, None, 0)
+TABLE: entities_fts_config
+  (0, 'k', '', 1, None, 1)
+  (1, 'v', '', 0, None, 0)
+TABLE: sqlite_stat1
+  (0, 'tbl', '', 0, None, 0)
+  (1, 'idx', '', 0, None, 0)
+  (2, 'stat', '', 0, None, 0)

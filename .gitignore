@@ -1,0 +1,32 @@
+# --- Datos del negocio (nunca al repositorio): ZIP/PDF de entrada, salidas, maestro y catálogos ---
+/data/
+/SUPER/
+*.xlsx
+*.xls
+*.sqlite
+*.sqlite3
+*.db
+cloudflare/migracion/
+
+# --- Secretos / configuración local ---
+.env
+.env.*
+.dev.vars
+*.pem
+*.key
+
+# --- Dependencias y artefactos de build ---
+node_modules/
+.wrangler/
+__pycache__/
+*.pyc
+.venv/
+
+# --- Archivos de depuración y logs ---
+out.txt
+error_log.txt
+korban.txt
+db_structure.txt
+scratch/
+scratch_*
+*.log

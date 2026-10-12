@@ -1,0 +1,38 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "lector-pdf-agente",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+
+  // D1: pipeline + maestro + hallazgos del agente. Reemplaza database_id tras `wrangler d1 create lector-pdf-db`.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "lector-pdf-db",
+      "database_id": "4906c0a8-b141-49fa-b8bd-04d121d87136",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // R2: ZIPs de entrada (input/) y PDFs extraídos (pdf/)
+  "r2_buckets": [{ "binding": "ARCHIVOS", "bucket_name": "lector-pdf-archivos" }],
+
+  "workflows": [
+    { "name": "lector-pdf-pipeline", "binding": "PIPELINE", "class_name": "PipelineWorkflow" },
+    { "name": "lector-pdf-investigador", "binding": "INVESTIGADOR", "class_name": "InvestigadorWorkflow" }
+  ],
+
+  // 11:00 UTC = 06:00 Ecuador. Solo hace algo si CRON_ACTIVO="true".
+  "triggers": { "crons": ["0 11 * * *"] },
+
+  "vars": {
+    "MODELO_EXTRACCION": "gpt-4o-mini",
+    "MODELO_AGENTE": "gpt-5.4-mini",
+    "CRON_ACTIVO": "false",
+    "CRON_ZIPS_POR_DIA": "5",
+    "CRON_ENTIDADES_POR_DIA": "10",
+    "MAX_ITER_AGENTE": "12"
+  }
+  // Secrets (NO van aquí): OPENAI_API_KEY, API_TOKEN  ->  wrangler secret put <NOMBRE>
+}

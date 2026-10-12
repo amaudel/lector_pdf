@@ -1,0 +1,2453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LECTOR PDF — Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ── Variables & Diseño de Sistema (Vanilla CSS) ──────────────── */
+        :root {
+            --bg-color: #0b0f19;
+            --panel-bg: rgba(17, 24, 39, 0.7);
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.25);
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --secondary: #10b981;
+            --secondary-glow: rgba(16, 185, 129, 0.2);
+            --accent: #f59e0b;
+            --error: #ef4444;
+            --error-glow: rgba(239, 68, 68, 0.2);
+            --card-radius: 16px;
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --sidebar-width: 260px;
+        }
+
+        .light-mode {
+            --bg-color: #f3f4f6;
+            --panel-bg: rgba(255, 255, 255, 0.85);
+            --panel-border: rgba(0, 0, 0, 0.08);
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --primary: #4f46e5;
+            --primary-glow: rgba(79, 70, 229, 0.15);
+            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+            --secondary: #059669;
+            --secondary-glow: rgba(5, 150, 105, 0.1);
+            --accent: #d97706;
+            --error: #dc2626;
+            --error-glow: rgba(220, 38, 38, 0.1);
+        }
+
+        /* ── General Reset ───────────────────────────────────────────── */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+            transition: var(--transition-smooth);
+        }
+
+        /* ── Sidebar Nav ─────────────────────────────────────────────── */
+        aside {
+            width: var(--sidebar-width);
+            background: var(--panel-bg);
+            border-right: 1px solid var(--panel-border);
+            backdrop-filter: blur(16px);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 50;
+            transition: var(--transition-smooth);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        .logo-text h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item button {
+            width: 100%;
+            padding: 12px 16px;
+            background: transparent;
+            border: none;
+            border-radius: 12px;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .nav-item button:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active button {
+            color: white;
+            background: var(--primary-gradient);
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        .nav-item button svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 20px;
+            border: 1px solid var(--panel-border);
+        }
+
+        .theme-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-smooth);
+        }
+
+        .theme-btn.active {
+            background: var(--panel-bg);
+            color: var(--primary);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .server-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            padding: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--secondary-glow);
+        }
+
+        .status-dot.processing {
+            background-color: var(--accent);
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+            animation: pulse 1.5s infinite;
+        }
+
+        /* ── Main Layout Content ─────────────────────────────────────── */
+        main {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 40px;
+            max-width: 1400px;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        header h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        /* ── Tabs Content ────────────────────────────────────────────── */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ── Cards / Metrics Panel ───────────────────────────────────── */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .metric-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            backdrop-filter: blur(16px);
+            border-radius: var(--card-radius);
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: var(--transition-smooth);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), 0 0 15px var(--primary-glow);
+        }
+
+        .metric-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .metric-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .metric-card.success .metric-icon {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--secondary);
+        }
+
+        .metric-card.warning .metric-icon {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent);
+        }
+
+        .metric-card.error .metric-icon {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+
+        .metric-info h4 {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        /* ── Grid de Trabajo Dashboard ───────────────────────────────── */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            backdrop-filter: blur(16px);
+            border-radius: var(--card-radius);
+            padding: 28px;
+            position: relative;
+        }
+
+        .panel-card h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ── Drag & Drop Uploader ────────────────────────────────────── */
+        .dropzone {
+            border: 2px dashed var(--panel-border);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            background: rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .dropzone:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.03);
+        }
+
+        .dropzone-icon {
+            color: var(--primary);
+            margin-bottom: 16px;
+            animation: bounce 2s infinite;
+        }
+
+        .dropzone-icon svg {
+            width: 48px;
+            height: 48px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .dropzone-text h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .dropzone-text p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .upload-queue-list {
+            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .upload-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--panel-border);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .upload-item .file-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 70%;
+        }
+
+        .upload-item .file-progress {
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        /* ── Opciones de Ejecución ────────────────────────────────────── */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .option-item input[type="checkbox"] {
+            margin-top: 4px;
+            accent-color: var(--primary);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .option-text h5 {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .option-text p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            background: var(--primary-gradient);
+            color: white;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px var(--primary-glow);
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--primary-glow);
+        }
+
+        .btn-primary:disabled {
+            background: rgba(255,255,255,0.08);
+            color: var(--text-muted);
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-danger {
+            padding: 14px 20px;
+            border: 1px solid var(--error);
+            background: transparent;
+            color: var(--error);
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: var(--error);
+            color: white;
+            box-shadow: 0 4px 15px var(--error-glow);
+        }
+
+        .btn-danger:disabled {
+            border-color: var(--panel-border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        /* ── Consola en Vivo / Progreso ──────────────────────────────── */
+        .progress-section {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--card-radius);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .progress-header h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .progress-header .pct {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .progress-bar-bg {
+            height: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--primary-gradient);
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.4s ease;
+        }
+
+        .progress-bar-bg.global .progress-bar-fill {
+            background: var(--secondary);
+        }
+
+        .run-status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: rgba(0,0,0,0.15);
+            border-radius: 10px;
+            border: 1px solid var(--panel-border);
+            font-size: 0.9rem;
+        }
+
+        .step-pill {
+            padding: 4px 10px;
+            background: var(--primary-glow);
+            color: var(--primary);
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .terminal-container {
+            background: #060913;
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            height: 480px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .terminal-header {
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--panel-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background-color: var(--error); }
+        .dot.yellow { background-color: var(--accent); }
+        .dot.green { background-color: var(--secondary); }
+
+        .terminal-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .terminal-search {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--panel-border);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-family: inherit;
+            font-size: 0.8rem;
+            color: white;
+            outline: none;
+            width: 150px;
+            transition: var(--transition-smooth);
+        }
+
+        .terminal-search:focus {
+            width: 220px;
+            border-color: var(--primary);
+        }
+
+        .terminal-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            border-radius: 4px;
+            transition: var(--transition-smooth);
+        }
+
+        .terminal-btn:hover {
+            color: var(--text-main);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .terminal-body {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .log-line {
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .log-line .time {
+            color: #4b5563;
+            margin-right: 8px;
+            user-select: none;
+        }
+
+        .log-line.ok { color: var(--secondary); }
+        .log-line.error { color: var(--error); font-weight: 500; }
+        .log-line.warn { color: var(--accent); }
+        .log-line.dim { color: #6b7280; }
+        .log-line.info { color: #d1d5db; }
+
+        /* ── Base de Datos Grid ───────────────────────────────────────── */
+        .filter-bar {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-end;
+            margin-bottom: 24px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filter-group label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-input {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: white;
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            min-width: 180px;
+            transition: var(--transition-smooth);
+        }
+
+        .filter-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 8px var(--primary-glow);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--panel-border);
+            color: var(--text-main);
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--text-muted);
+        }
+
+        .table-container {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        thead {
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--panel-border);
+        }
+
+        th {
+            padding: 14px 20px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            color: var(--text-main);
+        }
+
+        td {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--panel-border);
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .ruc-badge {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(255,255,255,0.05);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .source-badge {
+            padding: 2px 8px;
+            background: rgba(99, 102, 241, 0.1);
+            color: #818cf8;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .source-badge.seps {
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+        }
+
+        .source-badge.sri {
+            background: rgba(245, 158, 11, 0.1);
+            color: #fbbf24;
+        }
+
+        .actions-cell {
+            text-align: right;
+        }
+
+        .btn-view-evidence {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-view-evidence:hover {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px var(--primary-glow);
+        }
+
+        .pagination-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pagination-info {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* ── Gestor de Archivos ──────────────────────────────────────── */
+        .file-manager-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .file-manager-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: 16px;
+            padding-right: 4px;
+        }
+
+        .file-card {
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--panel-border);
+            padding: 12px 16px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            transition: var(--transition-smooth);
+        }
+
+        .file-card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            background: rgba(255,255,255,0.02);
+        }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .file-card.zip .file-icon {
+            color: #fb7185;
+            background: rgba(244, 63, 94, 0.1);
+        }
+
+        .file-card.xlsx .file-icon {
+            color: #34d399;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .file-card.pdf .file-icon {
+            color: #f87171;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .file-meta {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+
+        .file-details {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 12px;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: 1px solid var(--panel-border);
+            background: transparent;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-icon:hover {
+            color: var(--text-main);
+            background: rgba(255,255,255,0.05);
+            border-color: var(--text-muted);
+        }
+
+        .btn-icon.delete:hover {
+            color: var(--error);
+            background: rgba(239,68,68,0.1);
+            border-color: var(--error);
+        }
+
+        .btn-icon.download:hover {
+            color: var(--secondary);
+            background: rgba(16,185,129,0.1);
+            border-color: var(--secondary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border: 1px dashed var(--panel-border);
+            border-radius: 10px;
+            margin-top: 16px;
+        }
+
+        /* ── Evidence Drawer / Modal ─────────────────────────────────── */
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: -480px;
+            width: 480px;
+            max-width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            border-left: 1px solid var(--panel-border);
+            z-index: 101;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .drawer-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .drawer.active {
+            right: 0;
+        }
+
+        .drawer-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--panel-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--panel-bg);
+        }
+
+        .drawer-header h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .drawer-body {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .drawer-details-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 10px;
+            padding: 16px;
+        }
+
+        .drawer-details-card h4 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .drawer-details-card p {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .drawer-details-card .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--panel-border);
+        }
+
+        .detail-item span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .detail-item p {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .evidence-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .evidence-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .evidence-meta .source {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .evidence-snippet {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            color: #d1d5db;
+            background: rgba(0,0,0,0.2);
+            padding: 8px;
+            border-radius: 4px;
+            border-left: 2px solid var(--primary);
+            white-space: pre-wrap;
+        }
+
+        /* ── Toasts Notifications ───────────────────────────────────── */
+        #toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 380px;
+        }
+
+        .toast {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            backdrop-filter: blur(16px);
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            font-size: 0.9rem;
+            animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .toast::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: var(--primary);
+        }
+
+        .toast.success::before { background-color: var(--secondary); }
+        .toast.error::before { background-color: var(--error); }
+        .toast.warning::before { background-color: var(--accent); }
+
+        .toast-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .toast-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* ── Animations ──────────────────────────────────────────────── */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── Sidebar Nav ── -->
+    <aside>
+        <div class="logo-container">
+            <div class="logo-icon">PDF</div>
+            <div class="logo-text">
+                <h1>LECTOR PDF</h1>
+                <p>ETL Pipeline v1.1.0</p>
+            </div>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item active" data-tab="dashboard">
+                <button>
+                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+                    Dashboard
+                </button>
+            </li>
+            <li class="nav-item" data-tab="console">
+                <button>
+                    <svg viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                    Consola en Vivo
+                </button>
+            </li>
+            <li class="nav-item" data-tab="database">
+                <button>
+                    <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>
+                    Base de Datos
+                </button>
+            </li>
+            <li class="nav-item" data-tab="files">
+                <button>
+                    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    Gestor de Archivos
+                </button>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="theme-toggle">
+                <button class="theme-btn active" id="dark-theme-btn" title="Modo Oscuro">
+                    <svg style="width:18px;height:18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </button>
+                <button class="theme-btn" id="light-theme-btn" title="Modo Claro">
+                    <svg style="width:18px;height:18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                </button>
+            </div>
+            <div class="server-status">
+                <div class="status-dot" id="status-indicator-dot"></div>
+                <span id="status-indicator-text">Servidor Conectado</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ── Main Area ── -->
+    <main>
+        <!-- Dashboard Header -->
+        <header>
+            <div>
+                <h2 id="view-title">Dashboard General</h2>
+                <p style="color:var(--text-muted);font-size:0.9rem;margin-top:4px" id="view-subtitle">Supervisión e ingesta de lotes de documentos</p>
+            </div>
+        </header>
+
+        <!-- ── TAB 1: DASHBOARD ── -->
+        <div class="tab-content active" id="tab-dashboard">
+            <!-- Metrics Panel -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>
+                    </div>
+                    <div class="metric-info">
+                        <h4>Empresas Maestras</h4>
+                        <div class="metric-value" id="metric-entities">0</div>
+                    </div>
+                </div>
+                <div class="metric-card success">
+                    <div class="metric-icon">
+                        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    </div>
+                    <div class="metric-info">
+                        <h4>Lotes Procesados</h4>
+                        <div class="metric-value" id="metric-batches">0</div>
+                    </div>
+                </div>
+                <div class="metric-card warning">
+                    <div class="metric-icon">
+                        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <div class="metric-info">
+                        <h4>Evidencias PDF</h4>
+                        <div class="metric-value" id="metric-evidence">0</div>
+                    </div>
+                </div>
+                <div class="metric-card error">
+                    <div class="metric-icon">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    </div>
+                    <div class="metric-info">
+                        <h4>Por Procesar</h4>
+                        <div class="metric-value" id="metric-pending">0</div>
+                    </div>
+                </div>
+                <div class="metric-card error" id="metric-card-failed" style="display: none;">
+                    <div class="metric-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    </div>
+                    <div class="metric-info">
+                        <h4>Lote con Error</h4>
+                        <div class="metric-value" id="metric-failed-batch" style="font-size: 1.1rem; word-break: break-all;">Ninguno</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interfaz Principal Dashboard -->
+            <div class="dashboard-grid">
+                <!-- Columna Izquierda: Uploader -->
+                <div class="panel-card">
+                    <h3>
+                        <svg style="width:20px;height:20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        Cargar Nuevos Lotes
+                    </h3>
+                    <div class="dropzone" id="upload-dropzone">
+                        <div class="dropzone-icon">
+                            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                        </div>
+                        <div class="dropzone-text">
+                            <h4>Arrastra tus archivos ZIP o PDF aquí</h4>
+                            <p>O haz clic para explorar en tu computadora (Límite 500MB)</p>
+                        </div>
+                        <input type="file" id="file-input" multiple accept=".zip,.pdf">
+                    </div>
+                    <div class="upload-queue-list" id="upload-queue"></div>
+                </div>
+
+                <!-- Columna Derecha: Controles del Pipeline -->
+                <div class="panel-card" style="display:flex; flex-direction:column; justify-content:space-between">
+                    <div>
+                        <h3>
+                            <svg style="width:20px;height:20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                            Opciones de Corrida
+                        </h3>
+                        <div class="options-list">
+                            <label class="option-item">
+                                <input type="checkbox" id="chk-web-enrichment">
+                                <div class="option-text">
+                                    <h5>Enriquecimiento Web (Búsqueda SRI/SEPS)</h5>
+                                    <p>Busca activamente RUCs en portales web públicos si no se encuentran de forma local.</p>
+                                </div>
+                            </label>
+                            <label class="option-item">
+                                <input type="checkbox" id="chk-force-reprocess">
+                                <div class="option-text">
+                                    <h5>Forzar Reproceso en Base Maestra</h5>
+                                    <p>Ignora la validación de lotes duplicados y vuelve a inyectar las métricas de evidencias.</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons" style="margin-top:20px">
+                        <button class="btn-primary" id="btn-start-run">
+                            <svg style="width:20px;height:20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            INICIAR PROCESAMIENTO
+                        </button>
+                        <button class="btn-danger" id="btn-stop-run" disabled title="Cancelar Corrida Activa">
+                            <svg style="width:20px;height:20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── TAB 2: CONSOLA EN VIVO ── -->
+        <div class="tab-content" id="tab-console">
+            <!-- Barra de Progreso Lote -->
+            <div class="progress-section">
+                <div class="progress-header">
+                    <h4>Lote Actual: <span id="progress-lote-name" style="color:var(--text-main)">—</span></h4>
+                    <span class="pct" id="progress-lote-pct">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-lote-fill"></div>
+                </div>
+
+                <div class="progress-header">
+                    <h4>Progreso Global (Todos los archivos)</h4>
+                    <span class="pct" id="progress-global-pct" style="color:var(--secondary)">0%</span>
+                </div>
+                <div class="progress-bar-bg global">
+                    <div class="progress-bar-fill" id="progress-global-fill"></div>
+                </div>
+
+                <div class="run-status-indicator">
+                    <div style="display:flex;align-items:center;gap:10px">
+                        <span id="run-status-text">Esperando inicio...</span>
+                    </div>
+                    <span class="step-pill" id="run-step-indicator">Paso —</span>
+                </div>
+            </div>
+
+            <!-- Terminal Visual -->
+            <div class="terminal-container">
+                <div class="terminal-header">
+                    <div class="terminal-dots">
+                        <div class="dot red"></div>
+                        <div class="dot yellow"></div>
+                        <div class="dot green"></div>
+                    </div>
+                    <div class="terminal-actions">
+                        <input type="text" class="terminal-search" id="terminal-search-input" placeholder="Buscar en logs...">
+                        <button class="terminal-btn" id="terminal-scroll-btn" title="Desactivar Desplazamiento Automático">
+                            <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                        </button>
+                        <button class="terminal-btn" id="terminal-clear-btn" title="Limpiar Consola">
+                            <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="terminal-body" id="terminal-logs-body">
+                    <div class="log-line dim"><span class="time">00:00:00</span>[INFO] Servidor listo. Esperando inicio de procesamiento...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── TAB 3: BASE DE DATOS ── -->
+        <div class="tab-content" id="tab-database">
+            <!-- Barra de Filtros -->
+            <div class="filter-bar">
+                <div class="filter-group" style="flex:1;min-width:240px">
+                    <label for="db-search">Buscar Entidad</label>
+                    <input type="text" id="db-search" class="filter-input" placeholder="RUC, Razón Social o Normalizada...">
+                </div>
+                <div class="filter-group">
+                    <label for="db-filter-provincia">Provincia</label>
+                    <select id="db-filter-provincia" class="filter-input">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="db-filter-tipo">Tipo Entidad</label>
+                    <select id="db-filter-tipo" class="filter-input">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="db-filter-fuente">Fuente</label>
+                    <select id="db-filter-fuente" class="filter-input">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <button class="btn-secondary" id="btn-db-reset" style="padding:10px 20px">Restaurar</button>
+                </div>
+            </div>
+
+            <!-- Tabla de Resultados -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th data-sort="ruc">RUC</th>
+                            <th data-sort="razon_social_canonica">Razón Social</th>
+                            <th data-sort="tipo_entidad">Tipo</th>
+                            <th data-sort="provincia_preferida">Provincia</th>
+                            <th data-sort="fuente_primaria">Fuente</th>
+                            <th data-sort="total_menciones" style="text-align:center">Menciones</th>
+                            <th data-sort="fecha_ultima_actualizacion">Última Vista</th>
+                            <th style="text-align:right">Evidencia</th>
+                        </tr>
+                    </thead>
+                    <tbody id="db-table-body">
+                        <tr>
+                            <td colspan="8" style="text-align:center;color:var(--text-muted);padding:40px">
+                                Cargando base de datos maestra...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            <div class="pagination-bar">
+                <div class="pagination-info" id="db-pagination-info">Mostrando 0 - 0 de 0 registros</div>
+                <div class="pagination-controls">
+                    <button class="btn-secondary" id="btn-db-prev" disabled>Anterior</button>
+                    <span id="db-page-indicator" style="font-size:0.9rem;font-weight:600">1</span>
+                    <button class="btn-secondary" id="btn-db-next" disabled>Siguiente</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── TAB 4: GESTOR DE ARCHIVOS ── -->
+        <div class="tab-content" id="tab-files">
+            <div class="file-manager-grid">
+                <!-- Columna Inputs -->
+                <div class="panel-card">
+                    <h3>
+                        <svg style="width:20px;height:20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        Archivos en Cola (data/input)
+                    </h3>
+                    <div class="file-list" id="files-input-list">
+                        <div class="empty-state">No hay archivos en la carpeta de entrada.</div>
+                    </div>
+                </div>
+
+                <!-- Columna Outputs -->
+                <div class="panel-card">
+                    <h3>
+                        <svg style="width:20px;height:20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        Reportes Generados (Excel)
+                    </h3>
+                    <div class="file-list" id="files-output-list">
+                        <div class="empty-state">No se han generado reportes en Excel.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ── Evidence Drawer Overlay & Panel ── -->
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+    <div class="drawer" id="drawer">
+        <div class="drawer-header">
+            <h3>Evidencias y Trazabilidad</h3>
+            <button class="terminal-btn" id="drawer-close-btn" style="color:var(--text-muted)">
+                <svg style="width:24px;height:24px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="drawer-body">
+            <!-- Detalles de Entidad -->
+            <div class="drawer-details-card">
+                <h4 id="drawer-ruc-label">RUC: —</h4>
+                <p id="drawer-title" style="font-size:1.1rem;margin-bottom:8px">—</p>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span>Provincia Preferida</span>
+                        <p id="drawer-provincia">—</p>
+                    </div>
+                    <div class="detail-item">
+                        <span>Tipo de Entidad</span>
+                        <p id="drawer-tipo">—</p>
+                    </div>
+                    <div class="detail-item">
+                        <span>Fuente Original</span>
+                        <p id="drawer-fuente">—</p>
+                    </div>
+                    <div class="detail-item">
+                        <span>Total Menciones</span>
+                        <p id="drawer-menciones">—</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Listado de Evidencias -->
+            <div>
+                <h4 style="font-size:0.85rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:12px">Menciones Detectadas en PDFs</h4>
+                <div id="drawer-evidence-list" style="display:flex;flex-direction:column;gap:12px">
+                    <!-- Dinámico -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container"></div>
+
+    <!-- ── JavaScript Dashboard Control ────────────────────────────────── -->
+    <script>
+        // ── Estado General de la App ──────────────────────────────────
+        const state = {
+            isRunning: false,
+            activeTab: 'dashboard',
+            stats: { total_entities: 0, total_batches: 0, total_evidence: 0, pending: 0 },
+            dbQuery: {
+                q: '',
+                provincia: '',
+                tipo: '',
+                fuente: '',
+                page: 1,
+                pageSize: 15,
+                sortBy: 'razon_social_canonica',
+                sortOrder: 'asc'
+            },
+            autoScrollLogs: true,
+            theme: 'dark'
+        };
+
+        const host = window.location.origin;
+
+        // ── Elementos DOM Frecuentes ──────────────────────────────────
+        const tabs = document.querySelectorAll('.nav-item');
+        const viewTitle = document.getElementById('view-title');
+        const viewSubtitle = document.getElementById('view-subtitle');
+        const themeDarkBtn = document.getElementById('dark-theme-btn');
+        const themeLightBtn = document.getElementById('light-theme-btn');
+        const terminalLogs = document.getElementById('terminal-logs-body');
+
+        // ── Inicialización de la Aplicación ───────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            initNavigation();
+            initTheme();
+            initUploader();
+            initControls();
+            initDatabaseTab();
+            initSSE();
+            refreshAll();
+
+            // Refrescar estadísticas en bucle regular
+            setInterval(fetchStats, 6000);
+            setInterval(fetchFiles, 8000);
+        });
+
+        // ── Navegación entre Tabs ─────────────────────────────────────
+        function initNavigation() {
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetTab = tab.getAttribute('data-tab');
+                    switchTab(targetTab);
+                });
+            });
+        }
+
+        function switchTab(tabId) {
+            tabs.forEach(t => t.classList.remove('active'));
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+
+            state.activeTab = tabId;
+
+            // Actualizar Cabeceras
+            const headers = {
+                dashboard: { title: 'Dashboard General', subtitle: 'Supervisión e ingesta de lotes de documentos' },
+                console: { title: 'Consola de Procesamiento', subtitle: 'Monitoreo de tareas y logs en tiempo real' },
+                database: { title: 'Base de Datos Maestra', subtitle: 'Exploración y búsqueda de entidades validadas' },
+                files: { title: 'Gestor de Archivos', subtitle: 'Descarga de reportes en Excel y limpieza de lotes' }
+            };
+
+            viewTitle.textContent = headers[tabId].title;
+            viewSubtitle.textContent = headers[tabId].subtitle;
+
+            // Acciones específicas de tab
+            if (tabId === 'database') {
+                fetchFilters();
+                fetchDatabase();
+            } else if (tabId === 'files') {
+                fetchFiles();
+            }
+        }
+
+        // ── Alternancia de Tema Claro / Oscuro ─────────────────────────
+        function initTheme() {
+            // Guardar o leer preferencia
+            const savedTheme = localStorage.getItem('lector-pdf-theme') || 'dark';
+            setTheme(savedTheme);
+
+            themeDarkBtn.addEventListener('click', () => setTheme('dark'));
+            themeLightBtn.addEventListener('click', () => setTheme('light'));
+        }
+
+        function setTheme(theme) {
+            state.theme = theme;
+            localStorage.setItem('lector-pdf-theme', theme);
+
+            if (theme === 'light') {
+                document.body.classList.add('light-mode');
+                themeLightBtn.classList.add('active');
+                themeDarkBtn.classList.remove('active');
+            } else {
+                document.body.classList.remove('light-mode');
+                themeDarkBtn.classList.add('active');
+                themeLightBtn.classList.remove('active');
+            }
+        }
+
+        // ── Llamadas API / Fetchers ───────────────────────────────────
+        async function refreshAll() {
+            await fetchStats();
+            await fetchFiles();
+        }
+
+        async function fetchStats() {
+            try {
+                const res = await fetch(`${host}/api/status`);
+                const data = await res.json();
+                
+                // Actualizar interfaz
+                document.getElementById('metric-entities').textContent = data.stats.total_entities.toLocaleString();
+                document.getElementById('metric-batches').textContent = data.stats.total_batches.toLocaleString();
+                document.getElementById('metric-evidence').textContent = data.stats.total_evidence.toLocaleString();
+                
+                const pendingCount = data.pending_zips + data.pending_pdfs;
+                document.getElementById('metric-pending').textContent = pendingCount;
+
+                // Actualizar estado de ejecución global
+                updateRunningState(data.is_running, data.progress);
+                updateFailedBatchUI(data.progress ? data.progress.failed_batch : 'Ninguno');
+            } catch (err) {
+                console.error('Error al conectar con la API de estadísticas', err);
+                showStatusDisconnected();
+            }
+        }
+
+        function updateFailedBatchUI(failedBatch) {
+            const card = document.getElementById('metric-card-failed');
+            const elem = document.getElementById('metric-failed-batch');
+            if (card && elem) {
+                if (failedBatch && failedBatch !== 'Ninguno' && failedBatch !== '') {
+                    elem.textContent = failedBatch;
+                    card.style.display = 'flex';
+                } else {
+                    elem.textContent = 'Ninguno';
+                    card.style.display = 'none';
+                }
+            }
+        }
+
+        function updateRunningState(isRunning, progress) {
+            state.isRunning = isRunning;
+            if (progress) {
+                updateFailedBatchUI(progress.failed_batch);
+            }
+            
+            const dot = document.getElementById('status-indicator-dot');
+            const txt = document.getElementById('status-indicator-text');
+            const btnStart = document.getElementById('btn-start-run');
+            const btnStop = document.getElementById('btn-stop-run');
+
+            if (isRunning) {
+                dot.className = 'status-dot processing';
+                txt.textContent = 'Procesando Lote';
+                btnStart.disabled = true;
+                btnStart.innerHTML = `<svg style="width:20px;height:20px;animation:pulse 1s infinite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Procesando Lote...`;
+                btnStop.disabled = false;
+
+                // Actualizar progreso si se cuenta con él
+                if (progress) {
+                    updateProgressBar(progress);
+                }
+            } else {
+                dot.className = 'status-dot';
+                txt.textContent = 'Servidor Conectado';
+                btnStart.disabled = false;
+                btnStart.innerHTML = `<svg style="width:20px;height:20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> INICIAR PROCESAMIENTO`;
+                btnStop.disabled = true;
+            }
+        }
+
+        function showStatusDisconnected() {
+            const dot = document.getElementById('status-indicator-dot');
+            const txt = document.getElementById('status-indicator-text');
+            dot.className = 'status-dot';
+            dot.style.backgroundColor = 'var(--error)';
+            dot.style.boxShadow = '0 0 8px var(--error)';
+            txt.textContent = 'Sin Conexión';
+        }
+
+        function updateProgressBar(progress) {
+            updateFailedBatchUI(progress ? progress.failed_batch : 'Ninguno');
+            const lName = document.getElementById('progress-lote-name');
+            const lPct = document.getElementById('progress-lote-pct');
+            const lFill = document.getElementById('progress-lote-fill');
+
+            const gPct = document.getElementById('progress-global-pct');
+            const gFill = document.getElementById('progress-global-fill');
+
+            const statusText = document.getElementById('run-status-text');
+            const stepInd = document.getElementById('run-step-indicator');
+
+            lName.textContent = progress.lote || 'Ninguno';
+            lPct.textContent = `${progress.pct_lote}%`;
+            lFill.style.width = `${progress.pct_lote}%`;
+
+            gPct.textContent = `${progress.pct_global}%`;
+            gFill.style.width = `${progress.pct_global}%`;
+
+            if (state.isRunning) {
+                statusText.textContent = `Procesando archivo ${progress.lote_index} de ${progress.lote_total}`;
+                stepInd.textContent = `Paso: ${progress.paso || '—'}`;
+            } else {
+                statusText.textContent = 'Esperando inicio...';
+                stepInd.textContent = 'Paso —';
+            }
+        }
+
+        async function fetchFiles() {
+            try {
+                const res = await fetch(`${host}/api/files`);
+                const data = await res.json();
+
+                renderFileList(data.inputs, 'files-input-list', 'input');
+                renderFileList(data.outputs, 'files-output-list', 'output');
+            } catch (err) {
+                console.error('Error al listar archivos', err);
+            }
+        }
+
+        function renderFileList(files, containerId, type) {
+            const container = document.getElementById(containerId);
+            if (!files || files.length === 0) {
+                container.innerHTML = `<div class="empty-state">${type === 'input' ? 'No hay archivos ZIP ni PDFs sueltos en la carpeta de entrada.' : 'No se han generado reportes en Excel.'}</div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            files.forEach(file => {
+                const card = document.createElement('div');
+                const ext = file.name.split('.').pop().toLowerCase();
+                card.className = `file-card ${ext}`;
+
+                const icon = ext === 'zip' ? `<svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>` 
+                             : ext === 'xlsx' ? `<svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`
+                             : `<svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                const date = new Date(file.mtime).toLocaleString();
+
+                let actionHtml = '';
+                if (type === 'output') {
+                    actionHtml = `
+                        <button class="btn-icon download" onclick="downloadFile('${file.name}')" title="Descargar Reporte Excel">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        </button>
+                    `;
+                }
+
+                actionHtml += `
+                    <button class="btn-icon delete" onclick="deleteFile('${type}', '${file.name}')" title="Eliminar Archivo">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                `;
+
+                card.innerHTML = `
+                    <div class="file-icon">${icon}</div>
+                    <div class="file-meta">
+                        <div class="file-title" title="${file.name}">${file.name}</div>
+                        <div class="file-details">
+                            <span>${sizeMB} MB</span>
+                            <span>${date}</span>
+                        </div>
+                    </div>
+                    <div class="file-actions">
+                        ${actionHtml}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function deleteFile(type, filename) {
+            if (!confirm(`¿Estás seguro de que deseas eliminar el archivo "${filename}"?`)) {
+                return;
+            }
+            try {
+                const res = await fetch(`${host}/api/files/${type}/${filename}`, { method: 'DELETE' });
+                if (res.ok) {
+                    showToast(`Archivo ${filename} eliminado.`, 'success');
+                    refreshAll();
+                } else {
+                    const err = await res.json();
+                    showToast(`No se pudo eliminar: ${err.detail}`, 'error');
+                }
+            } catch (err) {
+                showToast('Error al enviar solicitud de eliminación.', 'error');
+            }
+        }
+
+        function downloadFile(filename) {
+            window.location.href = `${host}/api/download/output/${filename}`;
+        }
+
+        // ── Drag & Drop Uploader JavaScript ───────────────────────────
+        function initUploader() {
+            const dropzone = document.getElementById('upload-dropzone');
+            const fileInput = document.getElementById('file-input');
+            const queueContainer = document.getElementById('upload-queue');
+
+            dropzone.addEventListener('click', () => fileInput.click());
+
+            dropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropzone.style.borderColor = 'var(--primary)';
+                dropzone.style.background = 'rgba(99, 102, 241, 0.05)';
+            });
+
+            ['dragleave', 'dragend'].forEach(ev => {
+                dropzone.addEventListener(ev, () => {
+                    dropzone.style.borderColor = 'var(--panel-border)';
+                    dropzone.style.background = 'rgba(0, 0, 0, 0.1)';
+                });
+            });
+
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropzone.style.borderColor = 'var(--panel-border)';
+                dropzone.style.background = 'rgba(0, 0, 0, 0.1)';
+
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFilesUpload(files);
+                }
+            });
+
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length > 0) {
+                    handleFilesUpload(fileInput.files);
+                }
+            });
+        }
+
+        async function handleFilesUpload(files) {
+            const queueContainer = document.getElementById('upload-queue');
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const ext = file.name.split('.').pop().toLowerCase();
+                if (ext !== 'zip' && ext !== 'pdf') {
+                    showToast(`Formato no permitido: ${file.name}. Solo se aceptan ZIP y PDF.`, 'warning');
+                    continue;
+                }
+
+                // Crear barra de progreso visual en cola
+                const uploadItem = document.createElement('div');
+                uploadItem.className = 'upload-item';
+                uploadItem.innerHTML = `
+                    <span class="file-name" title="${file.name}">${file.name}</span>
+                    <span class="file-progress" id="up-prog-${i}">Subiendo...</span>
+                `;
+                queueContainer.appendChild(uploadItem);
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', `${host}/api/upload`, true);
+
+                    xhr.upload.onprogress = (e) => {
+                        if (e.lengthComputable) {
+                            const pct = Math.round((e.loaded / e.total) * 100);
+                            document.getElementById(`up-prog-${i}`).textContent = `${pct}%`;
+                        }
+                    };
+
+                    xhr.onload = () => {
+                        if (xhr.status === 200) {
+                            document.getElementById(`up-prog-${i}`).textContent = 'Completado';
+                            document.getElementById(`up-prog-${i}`).style.color = 'var(--secondary)';
+                            showToast(`Lote "${file.name}" cargado exitosamente.`, 'success');
+                            refreshAll();
+                            // Limpiar elemento de cola después de 2s
+                            setTimeout(() => uploadItem.remove(), 2500);
+                        } else {
+                            document.getElementById(`up-prog-${i}`).textContent = 'Error';
+                            document.getElementById(`up-prog-${i}`).style.color = 'var(--error)';
+                            showToast(`Fallo al cargar "${file.name}".`, 'error');
+                        }
+                    };
+
+                    xhr.onerror = () => {
+                        document.getElementById(`up-prog-${i}`).textContent = 'Error Conexión';
+                        document.getElementById(`up-prog-${i}`).style.color = 'var(--error)';
+                    };
+
+                    xhr.send(formData);
+                } catch (err) {
+                    console.error('Error de red al subir archivo', err);
+                }
+            }
+        }
+
+        // ── Iniciar o Cancelar el Pipeline ─────────────────────────────
+        function initControls() {
+            const btnStart = document.getElementById('btn-start-run');
+            const btnStop = document.getElementById('btn-stop-run');
+            const chkWeb = document.getElementById('chk-web-enrichment');
+            const chkForce = document.getElementById('chk-force-reprocess');
+
+            btnStart.addEventListener('click', async () => {
+                if (state.isRunning) return;
+
+                const config = {
+                    enable_web_enrichment: chkWeb.checked,
+                    force_reprocess: chkForce.checked
+                };
+
+                try {
+                    const res = await fetch(`${host}/api/start`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(config)
+                    });
+
+                    if (res.ok) {
+                        showToast('Pipeline iniciado en segundo plano.', 'success');
+                        switchTab('console');
+                        refreshAll();
+                    } else {
+                        const err = await res.json();
+                        showToast(`No se pudo iniciar: ${err.detail}`, 'error');
+                    }
+                } catch (err) {
+                    showToast('Error de conexión al iniciar el pipeline.', 'error');
+                }
+            });
+
+            btnStop.addEventListener('click', async () => {
+                if (!state.isRunning) return;
+                if (!confirm('¿Realmente deseas abortar el procesamiento del lote activo?')) {
+                    return;
+                }
+
+                try {
+                    const res = await fetch(`${host}/api/stop`, { method: 'POST' });
+                    if (res.ok) {
+                        showToast('Deteniendo el procesamiento...', 'warning');
+                        refreshAll();
+                    }
+                } catch (err) {
+                    showToast('Error de conexión al detener el pipeline.', 'error');
+                }
+            });
+
+            // Controles de Consola Log
+            const searchLog = document.getElementById('terminal-search-input');
+            const clearLog = document.getElementById('terminal-clear-btn');
+            const scrollLog = document.getElementById('terminal-scroll-btn');
+
+            clearLog.addEventListener('click', () => {
+                terminalLogs.innerHTML = `<div class="log-line dim"><span class="time">${new Date().toLocaleTimeString()}</span>[INFO] Consola limpia. Esperando registros...</div>`;
+            });
+
+            scrollLog.addEventListener('click', () => {
+                state.autoScrollLogs = !state.autoScrollLogs;
+                if (state.autoScrollLogs) {
+                    scrollLog.style.color = 'var(--primary)';
+                    scrollLog.style.background = 'var(--primary-glow)';
+                    terminalLogs.scrollTop = terminalLogs.scrollHeight;
+                } else {
+                    scrollLog.style.color = 'var(--text-muted)';
+                    scrollLog.style.background = 'transparent';
+                }
+            });
+            // Resaltar por defecto
+            scrollLog.style.color = 'var(--primary)';
+            scrollLog.style.background = 'var(--primary-glow)';
+
+            searchLog.addEventListener('input', () => {
+                const val = searchLog.value.toLowerCase();
+                const lines = terminalLogs.querySelectorAll('.log-line');
+                lines.forEach(line => {
+                    const match = line.textContent.toLowerCase().includes(val);
+                    line.style.display = match ? 'block' : 'none';
+                });
+            });
+        }
+
+        // ── Base de Datos e Hilos FTS / Filtros ──────────────────────────
+        function initDatabaseTab() {
+            const search = document.getElementById('db-search');
+            const prov = document.getElementById('db-filter-provincia');
+            const tipo = document.getElementById('db-filter-tipo');
+            const fuente = document.getElementById('db-filter-fuente');
+            const reset = document.getElementById('btn-db-reset');
+
+            const prev = document.getElementById('btn-db-prev');
+            const next = document.getElementById('btn-db-next');
+
+            // Listeners de búsqueda (con debounce simple)
+            let debounceTimer;
+            search.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    state.dbQuery.q = search.value;
+                    state.dbQuery.page = 1;
+                    fetchDatabase();
+                }, 400);
+            });
+
+            [prov, tipo, fuente].forEach(el => {
+                el.addEventListener('change', () => {
+                    state.dbQuery[el.id.replace('db-filter-', '')] = el.value;
+                    state.dbQuery.page = 1;
+                    fetchDatabase();
+                });
+            });
+
+            reset.addEventListener('click', () => {
+                search.value = '';
+                prov.value = '';
+                tipo.value = '';
+                fuente.value = '';
+
+                state.dbQuery.q = '';
+                state.dbQuery.provincia = '';
+                state.dbQuery.tipo = '';
+                state.dbQuery.fuente = '';
+                state.dbQuery.page = 1;
+                fetchDatabase();
+            });
+
+            prev.addEventListener('click', () => {
+                if (state.dbQuery.page > 1) {
+                    state.dbQuery.page--;
+                    fetchDatabase();
+                }
+            });
+
+            next.addEventListener('click', () => {
+                state.dbQuery.page++;
+                fetchDatabase();
+            });
+
+            // Ordenamiento por columnas
+            document.querySelectorAll('th[data-sort]').forEach(th => {
+                th.addEventListener('click', () => {
+                    const field = th.getAttribute('data-sort');
+                    if (state.dbQuery.sortBy === field) {
+                        state.dbQuery.sortOrder = state.dbQuery.sortOrder === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        state.dbQuery.sortBy = field;
+                        state.dbQuery.sortOrder = 'asc';
+                    }
+                    fetchDatabase();
+                });
+            });
+
+            // Drawer de evidencias cierre
+            document.getElementById('drawer-close-btn').addEventListener('click', closeDrawer);
+            document.getElementById('drawer-overlay').addEventListener('click', closeDrawer);
+        }
+
+        async function fetchFilters() {
+            try {
+                const res = await fetch(`${host}/api/filters`);
+                const data = await res.json();
+
+                const provSelect = document.getElementById('db-filter-provincia');
+                const tipoSelect = document.getElementById('db-filter-tipo');
+                const fuenteSelect = document.getElementById('db-filter-fuente');
+
+                // Preservar valores seleccionados
+                const currentProv = provSelect.value;
+                const currentTipo = tipoSelect.value;
+                const currentFuente = fuenteSelect.value;
+
+                provSelect.innerHTML = '<option value="">Todas</option>';
+                data.provincias.forEach(p => provSelect.innerHTML += `<option value="${p}">${p}</option>`);
+
+                tipoSelect.innerHTML = '<option value="">Todos</option>';
+                data.tipos.forEach(t => tipoSelect.innerHTML += `<option value="${t}">${t}</option>`);
+
+                fuenteSelect.innerHTML = '<option value="">Todas</option>';
+                data.fuentes.forEach(f => fuenteSelect.innerHTML += `<option value="${f}">${f}</option>`);
+
+                provSelect.value = currentProv;
+                tipoSelect.value = currentTipo;
+                fuenteSelect.value = currentFuente;
+            } catch (err) {
+                console.error('Error cargando filtros', err);
+            }
+        }
+
+        async function fetchDatabase() {
+            const tableBody = document.getElementById('db-table-body');
+            const prevBtn = document.getElementById('btn-db-prev');
+            const nextBtn = document.getElementById('btn-db-next');
+            const pageInd = document.getElementById('db-page-indicator');
+            const info = document.getElementById('db-pagination-info');
+
+            // Construir URL con parámetros de consulta
+            const q = state.dbQuery;
+            const params = new URLSearchParams({
+                page: q.page,
+                page_size: q.pageSize,
+                sort_by: q.sortBy,
+                sort_order: q.sortOrder
+            });
+            if (q.q) params.append('q', q.q);
+            if (q.provincia) params.append('provincia', q.provincia);
+            if (q.tipo) params.append('tipo', q.tipo);
+            if (q.fuente) params.append('fuente', q.fuente);
+
+            try {
+                const res = await fetch(`${host}/api/database?${params.toString()}`);
+                const result = await res.json();
+
+                tableBody.innerHTML = '';
+                if (!result.data || result.data.length === 0) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="8" style="text-align:center;color:var(--text-muted);padding:40px">
+                                Ningún registro coincide con los filtros especificados.
+                            </td>
+                        </tr>
+                    `;
+                    info.textContent = 'Mostrando 0 - 0 de 0 registros';
+                    prevBtn.disabled = true;
+                    nextBtn.disabled = true;
+                    pageInd.textContent = '1';
+                    return;
+                }
+
+                // Renderizar filas
+                result.data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    const date = row.fecha_ultima_actualizacion ? new Date(row.fecha_ultima_actualizacion).toLocaleString() : '—';
+                    const tipo = row.tipo_entidad || 'DESCONOCIDO';
+                    const prov = row.provincia_preferida || 'DESCONOCIDA';
+                    
+                    const fTag = row.fuente_primaria ? row.fuente_primaria.toLowerCase() : 'db';
+                    const fClass = fTag.includes('seps') ? 'seps' : fTag.includes('sri') ? 'sri' : '';
+
+                    tr.innerHTML = `
+                        <td><span class="ruc-badge">${row.ruc}</span></td>
+                        <td style="font-weight:600">${row.razon_social_canonica}</td>
+                        <td><span style="font-size:0.85rem">${tipo}</span></td>
+                        <td><span style="font-size:0.85rem">${prov}</span></td>
+                        <td><span class="source-badge ${fClass}">${row.fuente_primaria || 'SQLite Local'}</span></td>
+                        <td style="text-align:center;font-weight:600;color:var(--primary)">${row.total_menciones}</td>
+                        <td style="font-size:0.8rem;color:var(--text-muted)">${date}</td>
+                        <td class="actions-cell">
+                            <button class="btn-view-evidence" onclick="viewEvidence('${row.ruc}', '${escapeHtml(row.razon_social_canonica)}')">Ver Evidencia</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+
+                // Control de Paginación
+                const startItem = (q.page - 1) * q.pageSize + 1;
+                const endItem = Math.min(q.page * q.pageSize, result.total);
+                info.textContent = `Mostrando ${startItem} - ${endItem} de ${result.total.toLocaleString()} registros`;
+
+                pageInd.textContent = q.page;
+                prevBtn.disabled = q.page === 1;
+                nextBtn.disabled = endItem >= result.total;
+
+            } catch (err) {
+                console.error('Error cargando base de datos', err);
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align:center;color:var(--error);padding:40px">
+                            Fallo al consultar el repositorio maestro. Comprueba la conexión.
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Drawer Evidencias PDF
+        async function viewEvidence(ruc, canonica) {
+            const overlay = document.getElementById('drawer-overlay');
+            const drawer = document.getElementById('drawer');
+            const rucLabel = document.getElementById('drawer-ruc-label');
+            const title = document.getElementById('drawer-title');
+            const list = document.getElementById('drawer-evidence-list');
+
+            // Llenar datos pre-carga
+            rucLabel.textContent = `RUC: ${ruc}`;
+            title.textContent = canonica;
+            list.innerHTML = '<div style="color:var(--text-muted);font-size:0.9rem">Buscando evidencias en PDFs de origen...</div>';
+
+            // Mostrar Drawer
+            overlay.classList.add('active');
+            drawer.classList.add('active');
+
+            try {
+                // Obtener datos maestros ampliados
+                const dbRes = await fetch(`${host}/api/database?q=${ruc}`);
+                const dbData = await dbRes.json();
+                if (dbData.data && dbData.data.length > 0) {
+                    const ent = dbData.data[0];
+                    document.getElementById('drawer-provincia').textContent = ent.provincia_preferida || 'DESCONOCIDA';
+                    document.getElementById('drawer-tipo').textContent = ent.tipo_entidad || 'DESCONOCIDO';
+                    document.getElementById('drawer-fuente').textContent = ent.fuente_primaria || 'SQLite Local';
+                    document.getElementById('drawer-menciones').textContent = ent.total_menciones;
+                }
+
+                // Obtener evidencias atómicas
+                const res = await fetch(`${host}/api/evidence/${ruc}`);
+                const data = await res.json();
+
+                list.innerHTML = '';
+                if (data.length === 0) {
+                    list.innerHTML = '<div style="color:var(--text-muted);font-size:0.9rem">No se encontraron evidencias granulares registradas para esta entidad.</div>';
+                    return;
+                }
+
+                data.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'evidence-item';
+                    const date = new Date(item.fecha_ingesta).toLocaleDateString();
+
+                    div.innerHTML = `
+                        <div class="evidence-meta">
+                            <span>Lote: <b>${item.lote}</b></span>
+                            <span>Fecha: <b>${date}</b></span>
+                        </div>
+                        <div style="font-size:0.8rem;margin-bottom:8px">
+                            Documento: <span style="font-weight:600;color:var(--text-main)">${item.archivo_origen}</span> 
+                            (Pág. <span style="font-weight:600;color:var(--primary)">${item.pagina_pdf}</span>)
+                        </div>
+                        <div class="evidence-snippet">${escapeHtml(item.fragmento_evidencia)}</div>
+                    `;
+                    list.appendChild(div);
+                });
+            } catch (err) {
+                list.innerHTML = '<div style="color:var(--error);font-size:0.9rem">Error al obtener las evidencias de base de datos.</div>';
+            }
+        }
+
+        function closeDrawer() {
+            document.getElementById('drawer-overlay').classList.remove('active');
+            document.getElementById('drawer').classList.remove('active');
+        }
+
+        // ── Conexión en Tiempo Real SSE (Logs & Progreso) ───────────────
+        function initSSE() {
+            const eventSource = new EventSource(`${host}/api/stream`);
+
+            eventSource.onopen = () => {
+                console.log('SSE Conexión establecida.');
+                document.getElementById('status-indicator-dot').style.backgroundColor = 'var(--secondary)';
+                document.getElementById('status-indicator-dot').style.boxShadow = '0 0 8px var(--secondary-glow)';
+            };
+
+            eventSource.onerror = (e) => {
+                console.error('SSE Error de Conexión. Reintentando...', e);
+                showStatusDisconnected();
+            };
+
+            eventSource.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                
+                if (data.event === 'status') {
+                    updateRunningState(data.data.is_running, data.data.progress);
+                } 
+                else if (data.event === 'progress') {
+                    updateProgressBar(data.data);
+                } 
+                else if (data.event === 'log') {
+                    appendTerminalLog(data.data.line, data.data.type);
+                } 
+                else if (data.event === 'done') {
+                    updateRunningState(false, null);
+                    refreshAll();
+                    if (data.data.success) {
+                        showToast('Procesamiento completado con éxito.', 'success');
+                    } else {
+                        showToast(`Finalizado con errores en: ${data.data.errors.join(', ')}`, 'warning');
+                    }
+                }
+            };
+        }
+
+        function appendTerminalLog(line, type) {
+            const ts = new Date().toTimeString().split(' ')[0];
+            const logLine = document.createElement('div');
+            logLine.className = `log-line ${type}`;
+            logLine.innerHTML = `<span class="time">${ts}</span>${escapeHtml(line)}`;
+            
+            terminalLogs.appendChild(logLine);
+
+            // Mantener límite de líneas en consola para performance
+            if (terminalLogs.children.length > 800) {
+                terminalLogs.removeChild(terminalLogs.firstChild);
+            }
+
+            if (state.autoScrollLogs) {
+                terminalLogs.scrollTop = terminalLogs.scrollHeight;
+            }
+        }
+
+        // ── Toasts de Notificaciones ──────────────────────────────────
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+
+            let icon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+            if (type === 'success') {
+                icon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+            } else if (type === 'error') {
+                icon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+            } else if (type === 'warning') {
+                icon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`;
+            }
+
+            toast.innerHTML = `
+                <div class="toast-icon">${icon}</div>
+                <div>${message}</div>
+            `;
+            container.appendChild(toast);
+
+            // Eliminar toast después de 4s
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) reverse forwards';
+                toast.addEventListener('animationend', () => toast.remove());
+            }, 4000);
+        }
+
+        // ── Helpers ───────────────────────────────────────────────────
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
